@@ -55,6 +55,10 @@ public class Habit {
         return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public LocalDateTime getStartDate() {
         return startDate;
     }
