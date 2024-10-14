@@ -1,5 +1,5 @@
 package habitsTrackApp.model;
 
-public enum HabitsType {
+public enum HabitType {
     DAILY, WEEKLY, CUSTOM
 }

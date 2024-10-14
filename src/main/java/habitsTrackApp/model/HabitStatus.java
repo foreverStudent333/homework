@@ -1,5 +1,5 @@
 package habitsTrackApp.model;
 
-public enum HabitsStatus {
+public enum HabitStatus {
     NEW, IN_PROGRESS, FINISHED
 }

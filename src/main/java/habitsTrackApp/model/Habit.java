@@ -1,29 +1,28 @@
 package habitsTrackApp.model;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Habit {
     private Integer id;
     private String name;
     private String description;
-    private HabitsType habitsType;
-    private HabitsStatus habitsStatus;
+    private HabitType habitType;
+    private HabitStatus habitStatus;
     private LocalDateTime startDate;
 
-    public Habit(String name, String description, HabitsType habitsType) {
+    public Habit(String name, String description, HabitType habitType) {
         this.name = name;
         this.description = description;
-        this.habitsType = habitsType;
-        this.habitsStatus = HabitsStatus.NEW;
+        this.habitType = habitType;
+        this.habitStatus = HabitStatus.NEW;
         this.startDate = LocalDateTime.now();
     }
 
     public Habit(String name, String description) {
         this.name = name;
         this.description = description;
-        this.habitsType = HabitsType.CUSTOM;
-        this.habitsStatus = HabitsStatus.NEW;
+        this.habitType = HabitType.CUSTOM;
+        this.habitStatus = HabitStatus.NEW;
         this.startDate = LocalDateTime.now();
     }
 
@@ -43,12 +42,12 @@ public class Habit {
         this.description = description;
     }
 
-    public HabitsType getHabitsType() {
-        return habitsType;
+    public HabitType getHabitType() {
+        return habitType;
     }
 
-    public void setHabitsType(HabitsType habitsType) {
-        this.habitsType = habitsType;
+    public void setHabitType(HabitType habitType) {
+        this.habitType = habitType;
     }
 
     public Integer getId() {
@@ -67,11 +66,23 @@ public class Habit {
         this.startDate = startDate;
     }
 
-    public HabitsStatus getHabitsStatus() {
-        return habitsStatus;
+    public HabitStatus getHabitStatus() {
+        return habitStatus;
     }
 
-    public void setHabitsStatus(HabitsStatus habitsStatus) {
-        this.habitsStatus = habitsStatus;
+    public void setHabitStatus(HabitStatus habitStatus) {
+        this.habitStatus = habitStatus;
+    }
+
+    @Override
+    public String toString() {
+        return "Habit{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", habitType=" + habitType +
+                ", habitStatus=" + habitStatus +
+                ", startDate=" + startDate +
+                '}';
     }
 }

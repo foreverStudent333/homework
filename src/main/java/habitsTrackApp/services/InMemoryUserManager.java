@@ -1,7 +1,7 @@
 package habitsTrackApp.services;
 
 import habitsTrackApp.model.Habit;
-import habitsTrackApp.model.HabitsStatus;
+import habitsTrackApp.model.HabitStatus;
 import habitsTrackApp.model.User;
 
 import java.util.HashMap;
@@ -22,7 +22,7 @@ public class InMemoryUserManager implements UserManager {
     public void addNewUser(User user) {
         String email = user.getEmail();
         String password = user.getPassword();
-        if (users.containsKey(email) || password.length() > 25) {
+        if (users.containsKey(email) || password.length() > 50) {
             return;
         }
         String regex = "^(.+)@(.+)$";
@@ -31,7 +31,7 @@ public class InMemoryUserManager implements UserManager {
             return;
         }
 
-        user.setId(userIdGenerator.getNextFreeId()); //присваеваю всем юзер айди для внутренней системы(не видно юзерам)
+        user.setId(userIdGenerator.getNextFreeId()); //присваиваю всем юзер айди для внутренней системы(не видно юзерам)
         users.put(email, user);
     }
 
@@ -64,7 +64,7 @@ public class InMemoryUserManager implements UserManager {
         if (oldUser == null) {
             return;
         }
-        if (oldUser.getPassword().equals(newPassword)) {
+        if (oldUser.getPassword().equals(oldPassword)) {
             oldUser.setPassword(newPassword);
         }
     }
@@ -96,32 +96,6 @@ public class InMemoryUserManager implements UserManager {
     public void changePasswordByEmailRecoveryCode(User user, String newPassword) {
         //
     }
-
-    @Override
-    public void addUserHabit(User user, Habit habit) {
-
-    }
-
-    @Override
-    public void deleteUserHabit(User user, Habit habit) {
-
-    }
-
-    @Override
-    public void updateUserHabitName(User user, Habit habit, String newName) {
-
-    }
-
-    @Override
-    public void updateUserHabitDescription(User user, Habit habit, String newDescription) {
-
-    }
-
-    @Override
-    public void updateUserHabitStatus(User user, Habit habit, HabitsStatus newStatus) {
-
-    }
-
 
     public static final class UserIdGenerator {
         private int nextFreeId = 1;
