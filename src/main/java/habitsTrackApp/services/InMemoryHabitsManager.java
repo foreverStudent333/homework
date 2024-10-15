@@ -10,23 +10,32 @@ import java.util.HashMap;
 import java.util.stream.Collectors;
 
 public class InMemoryHabitsManager implements HabitsManager {
-    private final InMemoryUserManager.UserIdGenerator userIdGenerator;
+    private final InMemoryUserManager.IdGenerator habitIdGenerator;
     final HashMap<User, HashMap<Integer, Habit>> habitsByUsers;
+    final InMemoryHistoryManager inMemoryHistoryManager;
 
     public InMemoryHabitsManager() {
-        userIdGenerator = new InMemoryUserManager.UserIdGenerator();
+        habitIdGenerator = new InMemoryUserManager.IdGenerator();
+        habitsByUsers = new HashMap<>();
+        inMemoryHistoryManager = new InMemoryHistoryManager();
+    }
+
+    public InMemoryHabitsManager(InMemoryHistoryManager inMemoryHistoryManager) {
+        this.inMemoryHistoryManager = inMemoryHistoryManager;
+        habitIdGenerator = new InMemoryUserManager.IdGenerator();
         habitsByUsers = new HashMap<>();
     }
 
     @Override
     public void addNewHabit(User user, Habit habit) {
-        habit.setId(userIdGenerator.getNextFreeId());     // выдаю привычке уникальный id
+        habit.setId(habitIdGenerator.getNextFreeId());     // выдаю привычке уникальный id
         if (!habitsByUsers.containsKey(user)) {
             habitsByUsers.put(user, new HashMap<>());
             habitsByUsers.get(user).put(habit.getId(), habit);
         } else {
             habitsByUsers.get(user).put(habit.getId(), habit);
         }
+        inMemoryHistoryManager.createHabitHistory(habit);
     }
 
     @Override
@@ -34,6 +43,7 @@ public class InMemoryHabitsManager implements HabitsManager {
         if (!habitsByUsers.containsKey(user)) {
             return;
         }
+        inMemoryHistoryManager.deleteHabitFromHistory(habitsByUsers.get(user).get(id));
         habitsByUsers.get(user).remove(id);
     }
 
@@ -61,6 +71,11 @@ public class InMemoryHabitsManager implements HabitsManager {
         habitsByUsers.get(user).get(habit.getId()).setHabitStatus(newStatus);
     }
 
+    @Override
+    public void setEveryHabitStatusFinished(User user) {
+        getAllUserHabits(user).forEach(habit -> habit.setHabitStatus(HabitStatus.FINISHED));
+    }
+
     public HashMap<User, HashMap<Integer, Habit>> getHabitsByUsers() {
         return habitsByUsers;
     }
@@ -78,7 +93,7 @@ public class InMemoryHabitsManager implements HabitsManager {
      * Если юзер есть вытаскиваю из мапы все привычки юзера
      * и делаю из них ArrayList
      *
-     * @param user это пользователь по которому выдадидм все его привычки
+     * @param user это пользователь по которому выдадим все его привычки
      * @return возвращаем список всех привычек юзера
      */
     @Override
@@ -91,8 +106,9 @@ public class InMemoryHabitsManager implements HabitsManager {
 
     /**
      * Returns {@code null} если нет такого юзера в базе.
+     *
      * @param user это пользователь привычки которого фильтруем.
-     * {@code status} это статус по которому фильтруем
+     *             {@code status} это статус по которому фильтруем
      * @return возвращаем список только тех привычек которые
      * имеют статус переданный в параметре {@code status}
      */
@@ -126,19 +142,11 @@ public class InMemoryHabitsManager implements HabitsManager {
 
     @Override
     public ArrayList<Habit> getAllUserHabitsFilteredByCreationDate(User user) {
-        if(!habitsByUsers.containsKey(user)) {
+        if (!habitsByUsers.containsKey(user)) {
             return null;
         }
         ArrayList<Habit> habits = getAllUserHabits(user);
         habits.sort(Comparator.comparing(Habit::getStartDate));
         return habits;
-    }
-
-    public static final class UserIdGenerator {
-        private int nextFreeId = 1;
-
-        public int getNextFreeId() {
-            return nextFreeId++;
-        }
     }
 }

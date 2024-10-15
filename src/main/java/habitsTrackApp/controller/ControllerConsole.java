@@ -5,20 +5,26 @@ import habitsTrackApp.model.HabitStatus;
 import habitsTrackApp.model.HabitType;
 import habitsTrackApp.model.User;
 import habitsTrackApp.services.InMemoryHabitsManager;
+import habitsTrackApp.services.InMemoryHistoryManager;
 import habitsTrackApp.services.InMemoryUserManager;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
+import java.util.SortedMap;
 
 public class ControllerConsole {
     Scanner scanner;
-    private InMemoryUserManager userManager;
-    private InMemoryHabitsManager habitManager;
+    private final InMemoryUserManager userManager;
+    private final InMemoryHabitsManager habitManager;
+    private final InMemoryHistoryManager historyManager;
     private User user;
     private Habit habit;
 
     public ControllerConsole() {
-        userManager = new InMemoryUserManager();
-        habitManager = new InMemoryHabitsManager();
+        historyManager = new InMemoryHistoryManager();
+        habitManager = new InMemoryHabitsManager(historyManager);
+        userManager = new InMemoryUserManager(habitManager, historyManager);
         user = null;
         habit = null;
         scanner = new Scanner(System.in);
@@ -29,6 +35,7 @@ public class ControllerConsole {
         int command = scanner.nextInt();
         String email = "";
         String password = "";
+        int daysPassCounter = 0;
 
         while (command != 0) {
             switch (command) {
@@ -59,13 +66,12 @@ public class ControllerConsole {
                     }
                     System.out.println("Введите пароль (не больше 50 символов)");
                     password = scanner.next();
-                    if (userManager.getUserByEmail(email).getPassword().equals(password)) {
+                    user = userManager.authorizeUser(email, password);
+                    if (user != null) {
                         System.out.println("Вы вошли в систему");
-                        user = userManager.getUserByEmail(email);
                     } else {
                         System.out.println("Некорректный email или пароль");
                     }
-
                     break;
                 case 3:
                     if (user == null) {
@@ -126,7 +132,7 @@ public class ControllerConsole {
                         System.out.println("Ты не авторизирован в системе");
                         break;
                     }
-                    printMenuForHabitsUpdate();
+                    printMenuForHabitsUpdateAndStatistics();
                     command = scanner.nextInt();
                     String name = "";
                     String description = "";
@@ -134,6 +140,8 @@ public class ControllerConsole {
                     String type = "";
                     String status = "";
                     HabitStatus habitStatus = HabitStatus.NEW;
+                    int days = 0;
+                    DateTimeFormatter onlyDateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
                     switch (command) {
                         case 1:
@@ -145,7 +153,7 @@ public class ControllerConsole {
                                     "1 - daily, 2 - weekly, 3 - any");
                             type = scanner.next();
                             HabitType habitType = getHabitTypeByNumber(type);
-                            habit = new Habit(name, description, habitType);
+                            habit = new Habit(name, description, habitType, user.getId());
                             habitManager.addNewHabit(user, habit);
                             System.out.println("done");
                             habit = null;
@@ -157,43 +165,108 @@ public class ControllerConsole {
                             System.out.println("Введите id привычки для изменения");
                             id = scanner.nextInt();
                             habit = habitManager.getHabitById(user, id);
-                            System.out.println("Если что-либо менять не требуется введите 0\n " +
-                                    "Введите новое название");
-                            name = scanner.next();
-                            if (!name.equals("0")) {
-                                habitManager.updateHabitName(user, habit, name);
+                            if (habit == null) {
+                                System.out.println("такой привычки нет");
+                                break;
                             }
-                            System.out.println("Введите новое описание");
-                            description = scanner.next();
-                            if (!description.equals("0")) {
-                                habitManager.updateHabitDescription(user, habit, description);
+                            System.out.println("Если хотите поменять статус введите 1\n" +
+                                    "Если хотите поменять название введите 2\n" +
+                                    "Если хотите поменять описание введите 3");
+                            int option = scanner.nextInt();
+                            switch (option) {
+                                case 1:
+                                    System.out.println("Введите новый статус привычки по номеру (введите номер): " +
+                                            "1 - new, 2 - in_progress, 3 - finished");
+                                    status = scanner.next();
+                                    if (!status.equals("1") && !status.equals("2") && !status.equals("3")) {
+                                        System.out.println("Неверный статус");
+                                        break;
+                                    }
+                                    habitStatus = getHabitStatusByNumber(status);
+                                    habitManager.updateHabitStatus(user, habit, habitStatus);
+                                    System.out.println("done!");
+                                    break;
+                                case 2:
+                                    System.out.println("Введите новое название");
+                                    name = scanner.next();
+                                    habitManager.updateHabitName(user, habit, name);
+                                    break;
+                                case 3:
+                                    System.out.println("Введите новое описание");
+                                    description = scanner.next();
+                                    habitManager.updateHabitDescription(user, habit, description);
+                                    break;
+                                default:
+                                    System.out.println("Такой команды нет");
+                                    break;
                             }
-                            System.out.println("Введите новый статус привычки по номеру (введите номер): " +
-                                    "1 - new, 2 - in_progress, 3 - finished");
-                            status = scanner.next();
-                            habitStatus = getHabitStatusByNumber(status);
-                            habitManager.updateHabitStatus(user, habit, habitStatus);
-                            System.out.println("done!");
                             break;
                         case 4:
+                            habitManager.setEveryHabitStatusFinished(user);
+                            System.out.println("done");
+                            break;
+                        case 5:
                             System.out.println("С каким статусом показать все привычки (введите номер): " +
                                     "1 - new, 2 - in_progress, 3 - finished");
                             status = scanner.next();
+                            if (!status.equals("1") && !status.equals("2") && !status.equals("3")) {
+                                System.out.println("Неверный статус");
+                                break;
+                            }
                             habitStatus = getHabitStatusByNumber(status);
                             habitManager.getUserHabitsWithACertainStatus(user, habitStatus).forEach(System.out::println);
                             break;
-                        case 5:
+                        case 6:
                             habitManager.getUserHabitsFilteredByStatus(user).forEach(System.out::println);
                             break;
-                        case 6:
+                        case 7:
                             habitManager.getAllUserHabitsFilteredByCreationDate(user).forEach(System.out::println);
                             break;
-                        case 7:
+                        case 8:
+                            System.out.println("Введите id привычки");
+                            id = scanner.nextInt();
+                            habit = habitManager.getHabitById(user, id);
+                            if (habit == null) {
+                                System.out.println("такой привычки нет");
+                                break;
+                            }
+                            System.out.println("Введите кол-во дней период статистики от 1 до 30");
+                            days = scanner.nextInt();
+                            if (days > 0 && days <= 30 && daysPassCounter > 0) {
+                                System.out.println("Статистика за последние " + days + " дней");
+                                SortedMap<LocalDateTime, HabitStatus> habitMap =
+                                        historyManager.getHabitStatisticsForGivenPeriod(habit, days);
+                                for (LocalDateTime date : habitMap.keySet()) {
+                                    System.out.println(date.format(onlyDateFormat) + " - " + habitMap.get(date));
+                                }
+                            } else if (daysPassCounter == 0) {
+                                System.out.println("Еще не прошел ни 1 день. Начните новый день из меню" +
+                                        "5 - Начать новый день");
+                            } else {
+                                System.out.println("неверный период");
+                            }
+                            break;
+                        case 9:
+                            System.out.println("Введите кол-во дней период статистики от 1 до 365");
+                            days = scanner.nextInt();
+                            if (days > 0 && days <= 365 && daysPassCounter > 0) {
+                                int percent = historyManager.
+                                        getSuccessPercentOfUsersFinishedHabitsForGivenPeriod(user, days);
+                                System.out.println("Успешный % выполнения привычек за последние " +
+                                        days + " дней = " + percent + "%");
+                            } else if (daysPassCounter == 0) {
+                                System.out.println("Еще не прошел ни 1 день. Начните новый день из меню" +
+                                        "5 - Начать новый день");
+                            } else {
+                                System.out.println("неверный период");
+                            }
+                            break;
+                        case 10:
                             System.out.println("Введите id привычки для удаления");
                             id = scanner.nextInt();
                             habitManager.deleteHabitById(user, id);
                             break;
-                        case 8:
+                        case 11:
                             user = null;
                             System.out.println("Вы вышли из системы!");
                             break;
@@ -203,6 +276,16 @@ public class ControllerConsole {
                             System.out.println("Такой команды нет, введите команду снова.");
                             break;
                     }
+                    break;
+                case 5:
+                    userManager.resetAllDoneDailyHabits(user);
+                    System.out.println("done!");
+                    daysPassCounter++;
+                    break;
+                case 6:
+                    userManager.resetAllDoneWeeklyHabits(user);
+                    System.out.println("done!");
+                    daysPassCounter++;
                     break;
                 default:
                     System.out.println("Такой команды нет, введите команду снова.");
@@ -219,7 +302,9 @@ public class ControllerConsole {
         System.out.println("1 - Регистрация");
         System.out.println("2 - Авторизация");
         System.out.println("3 - Редактировать профиль пользователя");
-        System.out.println("4 - Редактировать привычки пользователя");
+        System.out.println("4 - Статистика и редактирование привычек пользователя");
+        System.out.println("5 - Начать новый день (обнулит все выполненные ежедневные привычки");
+        System.out.println("6 - Начать новую неделю (обнулит все еженедельные и ежедневные выполненные привычки");
         System.out.println("0 - Выйти из приложения.");
     }
 
@@ -233,16 +318,19 @@ public class ControllerConsole {
         System.out.println("0 - Назад");
     }
 
-    private void printMenuForHabitsUpdate() {
+    private void printMenuForHabitsUpdateAndStatistics() {
         System.out.println("Выбери команду ниже");
         System.out.println("1 - Создать привычку");
         System.out.println("2 - Показать все привычки");
-        System.out.println("3 - Поменять привычку");
-        System.out.println("4 - Показать все привычки определенного статуса выполнения");
-        System.out.println("5 - Показать все привычки отсортированные по статусу выполнения");
-        System.out.println("6 - Показать все привычки отсортированные по дате создания");
-        System.out.println("7 - Удалить привычку");
-        System.out.println("8 - Выйти из аккаунта");
+        System.out.println("3 - Редактировать привычку (в том числе СТАТУС привычки)");
+        System.out.println("4 - Установить статус finished для всех привычек");
+        System.out.println("5 - Показать все привычки определенного статуса выполнения");
+        System.out.println("6 - Показать все привычки отсортированные по статусу выполнения");
+        System.out.println("7 - Показать все привычки отсортированные по дате создания");
+        System.out.println("8 - Показать статистику выполнения привычки за указанный период");
+        System.out.println("9 - Показать статистику процент успешного выполнения привычек за определенный период");
+        System.out.println("10 - Удалить привычку");
+        System.out.println("11 - Выйти из аккаунта");
         System.out.println("0 - Назад");
     }
 

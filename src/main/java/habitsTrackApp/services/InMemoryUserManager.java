@@ -1,21 +1,30 @@
 package habitsTrackApp.services;
 
-import habitsTrackApp.model.Habit;
 import habitsTrackApp.model.HabitStatus;
+import habitsTrackApp.model.HabitType;
 import habitsTrackApp.model.User;
 
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
 public class InMemoryUserManager implements UserManager {
-    private final UserIdGenerator userIdGenerator;
+    private final IdGenerator userIdGenerator;
     final HashMap<String, User> users;
     final InMemoryHabitsManager inMemoryHabitsManager;
+    final InMemoryHistoryManager inMemoryHistoryManager;
 
     public InMemoryUserManager() {
-        userIdGenerator = new UserIdGenerator();
+        userIdGenerator = new IdGenerator();
         users = new HashMap<>();
         inMemoryHabitsManager = new InMemoryHabitsManager();
+        inMemoryHistoryManager = new InMemoryHistoryManager();
+    }
+
+    public InMemoryUserManager(InMemoryHabitsManager inMemoryHabitsManager, InMemoryHistoryManager inMemoryHistoryManager) {
+        userIdGenerator = new IdGenerator();
+        users = new HashMap<>();
+        this.inMemoryHabitsManager = inMemoryHabitsManager;
+        this.inMemoryHistoryManager = inMemoryHistoryManager;
     }
 
     @Override
@@ -55,6 +64,7 @@ public class InMemoryUserManager implements UserManager {
 
     @Override
     public void deleteUser(User user) {
+        inMemoryHistoryManager.deleteAllUserHabitsFromHistory(user);
         users.remove(user.getEmail());
     }
 
@@ -87,9 +97,45 @@ public class InMemoryUserManager implements UserManager {
             return;
         }
         addNewUser(newUser);
-        if(users.containsKey(newEmail)) {
+        if (users.containsKey(newEmail)) {
             deleteUser(oldUser);
         }
+    }
+
+    @Override
+    public void resetAllDoneDailyHabits(User user) {
+        inMemoryHabitsManager.getAllUserHabits(user).forEach(e -> {
+            inMemoryHistoryManager.updateDailyHabitHistory(e);
+            HabitType habitType = e.getHabitType();
+            if (habitType.equals(HabitType.WEEKLY)) {
+                //do nothing
+            } else if (habitType.equals(HabitType.DAILY) && e.getHabitStatus().equals(HabitStatus.FINISHED)) {
+                e.setHabitStatus(HabitStatus.IN_PROGRESS);
+                e.setStreak(e.getStreak() + 1);
+            } else {
+                e.setStreak(0);
+            }
+        });
+    }
+
+    @Override
+    public void resetAllDoneWeeklyHabits(User user) {
+        inMemoryHabitsManager.getAllUserHabits(user).forEach(e -> {
+            HabitType habitType = e.getHabitType();
+            if (habitType.equals(HabitType.WEEKLY)) {
+                inMemoryHistoryManager.updateWeeklyHabitHistory(e);
+            } else {
+                inMemoryHistoryManager.updateDailyHabitHistory(e);
+            }
+
+            if (habitType.equals(HabitType.WEEKLY) || habitType.equals(HabitType.DAILY)
+                    && e.getHabitStatus().equals(HabitStatus.FINISHED)) {
+                e.setHabitStatus(HabitStatus.IN_PROGRESS);
+                e.setStreak(e.getStreak() + 1);
+            } else {
+                e.setStreak(0);
+            }
+        });
     }
 
     @Override
@@ -97,7 +143,7 @@ public class InMemoryUserManager implements UserManager {
         //
     }
 
-    public static final class UserIdGenerator {
+    public static final class IdGenerator {
         private int nextFreeId = 1;
 
         public int getNextFreeId() {

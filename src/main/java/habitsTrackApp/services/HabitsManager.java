@@ -16,6 +16,7 @@ public interface HabitsManager {
     void updateHabitDescription(User user, Habit habit, String newDescription);
 
     void updateHabitStatus(User user, Habit habit, HabitStatus newStatus);
+    void setEveryHabitStatusFinished(User user);
 
     Habit getHabitById(User user, int habitId);
 

@@ -4,26 +4,32 @@ import java.time.LocalDateTime;
 
 public class Habit {
     private Integer id;
+    private Integer userOwnerId;
     private String name;
     private String description;
     private HabitType habitType;
     private HabitStatus habitStatus;
     private LocalDateTime startDate;
+    private int streak;
 
-    public Habit(String name, String description, HabitType habitType) {
+    public Habit(String name, String description, HabitType habitType, Integer userOwnerId) {
         this.name = name;
         this.description = description;
         this.habitType = habitType;
         this.habitStatus = HabitStatus.NEW;
         this.startDate = LocalDateTime.now();
+        this.streak = 0;
+        this.userOwnerId = userOwnerId;
     }
 
-    public Habit(String name, String description) {
+    public Habit(String name, String description, Integer userOwnerId) {
         this.name = name;
         this.description = description;
         this.habitType = HabitType.CUSTOM;
         this.habitStatus = HabitStatus.NEW;
         this.startDate = LocalDateTime.now();
+        this.streak = 0;
+        this.userOwnerId = userOwnerId;
     }
 
     public String getName() {
@@ -74,6 +80,22 @@ public class Habit {
         this.habitStatus = habitStatus;
     }
 
+    public int getStreak() {
+        return streak;
+    }
+
+    public void setStreak(int streak) {
+        this.streak = streak;
+    }
+
+    public Integer getUserOwnerId() {
+        return userOwnerId;
+    }
+
+    public void setUserOwnerId(Integer userOwnerId) {
+        this.userOwnerId = userOwnerId;
+    }
+
     @Override
     public String toString() {
         return "Habit{" +
@@ -83,6 +105,7 @@ public class Habit {
                 ", habitType=" + habitType +
                 ", habitStatus=" + habitStatus +
                 ", startDate=" + startDate +
+                ", streak=" + streak +
                 '}';
     }
 }

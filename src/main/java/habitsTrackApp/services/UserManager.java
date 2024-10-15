@@ -19,5 +19,9 @@ public interface UserManager {
 
     void changeEmail(User user, String newEmail);
 
+    void resetAllDoneDailyHabits (User user);
+
+    void resetAllDoneWeeklyHabits (User user);
+
     void changePasswordByEmailRecoveryCode(User user, String newPassword);
 }
