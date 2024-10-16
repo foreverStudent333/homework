@@ -92,7 +92,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         return resultPercent / habitsProgressHistoryMapByUserId.size();
     }
 
-    public HashMap<Habit, TreeMap<LocalDateTime, HabitStatus>> getHabitsProgressHistoryMapByUserId(Integer id) {
+    private HashMap<Habit, TreeMap<LocalDateTime, HabitStatus>> getHabitsProgressHistoryMapByUserId(Integer id) {
         HashMap<Habit, TreeMap<LocalDateTime, HabitStatus>> habitsProgressHistoryMapByUserId = new HashMap<>();
         habitsProgressHistoryMap.forEach((habit, treeMap) -> {
             if (habit.getUserOwnerId().equals(id)) {

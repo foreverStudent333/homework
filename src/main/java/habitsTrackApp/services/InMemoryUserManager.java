@@ -20,7 +20,8 @@ public class InMemoryUserManager implements UserManager {
         inMemoryHistoryManager = new InMemoryHistoryManager();
     }
 
-    public InMemoryUserManager(InMemoryHabitsManager inMemoryHabitsManager, InMemoryHistoryManager inMemoryHistoryManager) {
+    public InMemoryUserManager(InMemoryHabitsManager inMemoryHabitsManager,
+                               InMemoryHistoryManager inMemoryHistoryManager) {
         userIdGenerator = new IdGenerator();
         users = new HashMap<>();
         this.inMemoryHabitsManager = inMemoryHabitsManager;
@@ -34,8 +35,8 @@ public class InMemoryUserManager implements UserManager {
         if (users.containsKey(email) || password.length() > 50) {
             return;
         }
-        String regex = "^(.+)@(.+)$";
-        Pattern pattern = Pattern.compile(regex);
+        String regex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         if (!pattern.matcher(email).matches()) { // простая проверка на корректный емейл
             return;
         }
