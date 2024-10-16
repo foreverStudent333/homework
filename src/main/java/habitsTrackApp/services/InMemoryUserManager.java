@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public class InMemoryUserManager implements UserManager {
     private final IdGenerator userIdGenerator;
-    final HashMap<String, User> users;
+    private final HashMap<String, User> users;
     final InMemoryHabitsManager inMemoryHabitsManager;
     final InMemoryHistoryManager inMemoryHistoryManager;
 
@@ -47,6 +47,10 @@ public class InMemoryUserManager implements UserManager {
     @Override
     public User getUserByEmail(String email) {
         return users.get(email);
+    }
+
+    public HashMap<String, User> getUsers() {
+        return users;
     }
 
     @Override

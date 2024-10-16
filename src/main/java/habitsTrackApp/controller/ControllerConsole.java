@@ -1,9 +1,7 @@
 package habitsTrackApp.controller;
 
-import habitsTrackApp.model.Habit;
-import habitsTrackApp.model.HabitStatus;
-import habitsTrackApp.model.HabitType;
-import habitsTrackApp.model.User;
+import habitsTrackApp.model.*;
+import habitsTrackApp.services.InMemoryAdminManager;
 import habitsTrackApp.services.InMemoryHabitsManager;
 import habitsTrackApp.services.InMemoryHistoryManager;
 import habitsTrackApp.services.InMemoryUserManager;
@@ -18,15 +16,19 @@ public class ControllerConsole {
     private final InMemoryUserManager userManager;
     private final InMemoryHabitsManager habitManager;
     private final InMemoryHistoryManager historyManager;
+    private final InMemoryAdminManager adminManager;
     private User user;
     private Habit habit;
+    private Admin admin;
 
     public ControllerConsole() {
         historyManager = new InMemoryHistoryManager();
         habitManager = new InMemoryHabitsManager(historyManager);
         userManager = new InMemoryUserManager(habitManager, historyManager);
+        adminManager = new InMemoryAdminManager(userManager, habitManager);
         user = null;
         habit = null;
+        admin = null;
         scanner = new Scanner(System.in);
     }
 
@@ -67,10 +69,12 @@ public class ControllerConsole {
                     System.out.println("Введите пароль (не больше 50 символов)");
                     password = scanner.next();
                     user = userManager.authorizeUser(email, password);
-                    if (user != null) {
-                        System.out.println("Вы вошли в систему");
-                    } else {
+                    if (user == null) {
                         System.out.println("Некорректный email или пароль");
+                    } else if (user.isBlocked()) {
+                        System.out.println("Вход не выполнен, вы заблокированы!");
+                    } else {
+                        System.out.println("Вы вошли в систему");
                     }
                     break;
                 case 3:
@@ -287,6 +291,49 @@ public class ControllerConsole {
                     System.out.println("done!");
                     daysPassCounter++;
                     break;
+                case 7:
+                    user = null;
+                    System.out.println("Введите ваше имя");
+                    name = scanner.next();
+                    admin = new Admin(name);
+                    adminManager.createAdmin(admin);
+                    printMenuForAdmin();
+                    command = scanner.nextInt();
+                    while (command != 6) {
+                        switch (command) {
+                            case 1:
+                                System.out.println("Введите email (login) пользователя для блокировки");
+                                email = scanner.next();
+                                adminManager.blockUser(email);
+                                break;
+                            case 2:
+                                System.out.println("Введите email (login) пользователя для разблокировки");
+                                email = scanner.next();
+                                adminManager.unblockUser(email);
+                                break;
+                            case 3:
+                                System.out.println("Введите email (login) пользователя для удаления из базы");
+                                email = scanner.next();
+                                adminManager.deleteUser(email);
+                                break;
+                            case 4:
+                                System.out.println(adminManager.getAllUsers());
+                                break;
+                            case 5:
+                                System.out.println("Введите email (login) пользователя для " +
+                                        "получения списка его привычек");
+                                email = scanner.next();
+                                adminManager.getAllUserHabits(email).forEach(System.out::println);
+                                break;
+                            default:
+                                break;
+                        }
+                        printMenuForAdmin();
+                        command = scanner.nextInt();
+                    }
+                    admin = null;
+                    System.out.println("Вы вышли из админ панели!");
+                    break;
                 default:
                     System.out.println("Такой команды нет, введите команду снова.");
                     break;
@@ -305,6 +352,7 @@ public class ControllerConsole {
         System.out.println("4 - Статистика и редактирование привычек пользователя");
         System.out.println("5 - Начать новый день (обнулит все выполненные ежедневные привычки");
         System.out.println("6 - Начать новую неделю (обнулит все еженедельные и ежедневные выполненные привычки");
+        System.out.println("7 - Админ панель");
         System.out.println("0 - Выйти из приложения.");
     }
 
@@ -332,6 +380,16 @@ public class ControllerConsole {
         System.out.println("10 - Удалить привычку");
         System.out.println("11 - Выйти из аккаунта");
         System.out.println("0 - Назад");
+    }
+
+    private void printMenuForAdmin() {
+        System.out.println("Выбери команду ниже");
+        System.out.println("1 - Заблокировать пользователя");
+        System.out.println("2 - Разблокировать пользователя");
+        System.out.println("3 - Удалить пользователя");
+        System.out.println("4 - Получить список пользователй");
+        System.out.println("5 - Получить список привычек пользователя");
+        System.out.println("6 - Выйти из аккаунта / выйти из админ панели");
     }
 
     private HabitType getHabitTypeByNumber(String number) {

@@ -78,9 +78,18 @@ public class InMemoryHistoryManager implements HistoryManager {
         for (Habit habit : habitsProgressHistoryMapByUserId.keySet()) {
             habitProgressHistory = habitsProgressHistoryMapByUserId.get(habit);
             startFromDay = habitProgressHistory.lastKey().minusDays(days);
-            resultPercent += getSuccessPercentOfFinishedHabit(habitProgressHistory.tailMap(startFromDay));
+            LocalDateTime habitCreationDateTime = habitProgressHistory.firstKey();
+            //проверяю не задан ли поиск раньше чем была создана привычка по времени
+            //если раньше то убираю первое вхождение привычки в историю т.к. это вхождение при создании привычки
+            if (startFromDay.isBefore(habitCreationDateTime) ||
+                    startFromDay.isEqual(habitCreationDateTime)) {
+                resultPercent += getSuccessPercentOfFinishedHabit(habitProgressHistory.
+                        tailMap(habitCreationDateTime.plusSeconds(1)));
+            } else {
+                resultPercent += getSuccessPercentOfFinishedHabit(habitProgressHistory.tailMap(startFromDay));
+            }
         }
-        return resultPercent;
+        return resultPercent / habitsProgressHistoryMapByUserId.size();
     }
 
     public HashMap<Habit, TreeMap<LocalDateTime, HabitStatus>> getHabitsProgressHistoryMapByUserId(Integer id) {
