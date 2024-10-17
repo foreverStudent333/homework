@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 public class InMemoryAdminManager implements AdminManager {
     private final InMemoryUserManager.IdGenerator adminIdGenerator;
-    final HashMap<Integer, Admin> adminsById;
+    final private HashMap<Integer, Admin> adminsById;
     final InMemoryUserManager inMemoryUserManager;
     final InMemoryHabitsManager inMemoryHabitsManager;
 
@@ -67,5 +67,9 @@ public class InMemoryAdminManager implements AdminManager {
     @Override
     public ArrayList<Habit> getAllUserHabits(String email) {
         return inMemoryHabitsManager.getAllUserHabits(inMemoryUserManager.getUserByEmail(email));
+    }
+
+    public HashMap<Integer, Admin> getAdminsById() {
+        return adminsById;
     }
 }

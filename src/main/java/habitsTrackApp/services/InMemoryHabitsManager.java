@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class InMemoryHabitsManager implements HabitsManager {
     private final InMemoryUserManager.IdGenerator habitIdGenerator;
-    final HashMap<User, HashMap<Integer, Habit>> habitsByUsers;
+    private final HashMap<User, HashMap<Integer, Habit>> habitsByUsers;
     final InMemoryHistoryManager inMemoryHistoryManager;
 
     public InMemoryHabitsManager() {

@@ -145,7 +145,15 @@ public class InMemoryUserManager implements UserManager {
 
     @Override
     public void changePasswordByEmailRecoveryCode(User user, String newPassword) {
-        //
+        //TODO
+    }
+
+    public InMemoryHabitsManager getInMemoryHabitsManager() {
+        return inMemoryHabitsManager;
+    }
+
+    public InMemoryHistoryManager getInMemoryHistoryManager() {
+        return inMemoryHistoryManager;
     }
 
     public static final class IdGenerator {

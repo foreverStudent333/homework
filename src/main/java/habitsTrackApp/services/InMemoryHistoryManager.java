@@ -111,4 +111,12 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
         return percentOfFinishedHabits / habits.size();
     }
+
+    public TreeMap<LocalDateTime, HabitStatus> getHabitProgressHistory(Habit habit) {
+        return habitsProgressHistoryMap.get(habit);
+    }
+
+    public HashMap<Habit, TreeMap<LocalDateTime, HabitStatus>> getHabitsProgressHistoryMap() {
+        return habitsProgressHistoryMap;
+    }
 }
