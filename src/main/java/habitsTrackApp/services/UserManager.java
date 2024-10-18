@@ -1,9 +1,12 @@
 package habitsTrackApp.services;
 
-import habitsTrackApp.model.Habit;
-import habitsTrackApp.model.HabitStatus;
 import habitsTrackApp.model.User;
 
+/**
+ * Интерфейс описывающий логику работы с классом {@link User}
+ *
+ * @author Mihail Harhan "mihaillKHn@yandex.ru"
+ */
 public interface UserManager {
     void addNewUser(User user);
 

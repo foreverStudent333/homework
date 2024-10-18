@@ -7,6 +7,11 @@ import habitsTrackApp.model.User;
 import java.time.LocalDateTime;
 import java.util.SortedMap;
 
+/**
+ * Интерфейс описывающий логику работы сохранения истории всех привычек
+ *
+ * @author Mihail Harhan "mihaillKHn@yandex.ru"
+ */
 public interface HistoryManager {
     void createHabitHistory(Habit habit);
 

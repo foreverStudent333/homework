@@ -1,5 +1,10 @@
 package habitsTrackApp.model;
 
+/**
+ * Класс описывающий сущность администратор
+ *
+ * @author Mihail Harhan
+ */
 public class Admin {
     private Integer id;
     private String name;

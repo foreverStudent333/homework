@@ -2,6 +2,11 @@ package habitsTrackApp.model;
 
 import java.time.LocalDateTime;
 
+/**
+ * Класс описывающий сущность привычка
+ *
+ * @author Mihail Harhan
+ */
 public class Habit {
     private Integer id;
     private Integer userOwnerId;

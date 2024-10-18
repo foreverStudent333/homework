@@ -7,6 +7,11 @@ import habitsTrackApp.model.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Интерфейс описывающий логику работы с классом {@link Admin}
+ *
+ * @author Mihail Harhan "mihaillKHn@yandex.ru"
+ */
 public interface AdminManager {
     void createAdmin(Admin admin);
 

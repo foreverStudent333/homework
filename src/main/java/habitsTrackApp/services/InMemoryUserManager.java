@@ -7,6 +7,13 @@ import habitsTrackApp.model.User;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
+/**
+ * Класс описывающий логику работы с классом {@link User} для работы консольного приложения.
+ * Включает в себе реализацию crud для пользователя и хранения всех пользователей
+ * ключ(email) - значение(пользователь)
+ *
+ * @author Mihail Harhan "mihaillKHn@yandex.ru"
+ */
 public class InMemoryUserManager implements UserManager {
     private final IdGenerator userIdGenerator;
     private final HashMap<String, User> users;
@@ -20,6 +27,14 @@ public class InMemoryUserManager implements UserManager {
         inMemoryHistoryManager = new InMemoryHistoryManager();
     }
 
+    /**
+     * Создает экземпляр класса с переданными экземплярами классов {@code InMemoryHabitsManager}
+     * и {@code InMemoryHistoryManager}
+     *
+     * @param inMemoryHabitsManager  который хранит внутри себя все данные и логику для работы с {@code Habit}
+     * @param inMemoryHistoryManager который хранит внутри себя все данные и
+     *                               логику для работы с историей выполнения привычек
+     */
     public InMemoryUserManager(InMemoryHabitsManager inMemoryHabitsManager,
                                InMemoryHistoryManager inMemoryHistoryManager) {
         userIdGenerator = new IdGenerator();
@@ -28,6 +43,11 @@ public class InMemoryUserManager implements UserManager {
         this.inMemoryHistoryManager = inMemoryHistoryManager;
     }
 
+    /**
+     * Добавляет нового юзера в базу, проверяет валидность email и выдает юзеру уникальный id
+     *
+     * @param user новый, которого нужно занести в базу
+     */
     @Override
     public void addNewUser(User user) {
         String email = user.getEmail();
@@ -35,9 +55,7 @@ public class InMemoryUserManager implements UserManager {
         if (users.containsKey(email) || password.length() > 50) {
             return;
         }
-        String regex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
-        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        if (!pattern.matcher(email).matches()) { // простая проверка на корректный емейл
+        if (!isEmailValid(email)) {
             return;
         }
 
@@ -50,10 +68,20 @@ public class InMemoryUserManager implements UserManager {
         return users.get(email);
     }
 
+    /**
+     * @return {@code HashMap<String, User>} пользователей по ключу email
+     */
     public HashMap<String, User> getUsers() {
         return users;
     }
 
+    /**
+     * Авторизовывает юзера в системе, проверяет корректность его email и пароля
+     *
+     * @param email    по которому юзер находится в базе
+     * @param password пароль который нужно проверить принадлежит ли {@code user} и корректный ли
+     * @return {@code User} из базы юзеров
+     */
     @Override
     public User authorizeUser(String email, String password) {
         User user = getUserByEmail(email);
@@ -67,6 +95,11 @@ public class InMemoryUserManager implements UserManager {
         }
     }
 
+    /**
+     * Удаляет юзера из базы и всю его историю выполнения привычек
+     *
+     * @param user которого нужно удалить
+     */
     @Override
     public void deleteUser(User user) {
         inMemoryHistoryManager.deleteAllUserHabitsFromHistory(user);
@@ -107,6 +140,12 @@ public class InMemoryUserManager implements UserManager {
         }
     }
 
+    /**
+     * Метод вызывается при смене дня. Сбрасывает статус прогресса выполнения ежедневных привычек юзера
+     * с {@code HabitStatus.IN_PROGRESS} на {@code HabitStatus.IN_PROGRESS}
+     *
+     * @param user у которого нужно обновить статус привычек
+     */
     @Override
     public void resetAllDoneDailyHabits(User user) {
         inMemoryHabitsManager.getAllUserHabits(user).forEach(e -> {
@@ -123,6 +162,12 @@ public class InMemoryUserManager implements UserManager {
         });
     }
 
+    /**
+     * Метод вызывается при смене недели. Сбрасывает статус прогресса выполнения ежедневных
+     * и еженедельных привычек юзера с {@code HabitStatus.IN_PROGRESS} на {@code HabitStatus.IN_PROGRESS}
+     *
+     * @param user у которого нужно обновить статус привычек
+     */
     @Override
     public void resetAllDoneWeeklyHabits(User user) {
         inMemoryHabitsManager.getAllUserHabits(user).forEach(e -> {
@@ -154,6 +199,19 @@ public class InMemoryUserManager implements UserManager {
 
     public InMemoryHistoryManager getInMemoryHistoryManager() {
         return inMemoryHistoryManager;
+    }
+
+    /**
+     * проверка валидности почты email
+     *
+     * @param email который нужно проверить
+     * @return {@code true} если email валидный
+     */
+    private boolean isEmailValid(String email) {
+        String regex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        // простая проверка на корректный емейл
+        return pattern.matcher(email).matches();
     }
 
     public static final class IdGenerator {

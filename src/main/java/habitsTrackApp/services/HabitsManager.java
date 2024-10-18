@@ -6,6 +6,11 @@ import habitsTrackApp.model.User;
 
 import java.util.ArrayList;
 
+/**
+ * Интерфейс описывающий логику работы с классом {@link Habit}
+ *
+ * @author Mihail Harhan "mihaillKHn@yandex.ru"
+ */
 public interface HabitsManager {
     void addNewHabit(User user, Habit habit);
 

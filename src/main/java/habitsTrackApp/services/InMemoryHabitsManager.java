@@ -9,6 +9,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
+/**
+ * Класс описывающий логику работы с классом {@link Habit} для работы консольного приложения.
+ * Включает в себе реализацию crud для привычек и хранения всех привычек юзеров в формате
+ * ключ(юзер) - значение(мапа всех привычек юзера)
+ *
+ * @author Mihail Harhan "mihaillKHn@yandex.ru"
+ */
 public class InMemoryHabitsManager implements HabitsManager {
     private final InMemoryUserManager.IdGenerator habitIdGenerator;
     private final HashMap<User, HashMap<Integer, Habit>> habitsByUsers;
@@ -20,12 +27,24 @@ public class InMemoryHabitsManager implements HabitsManager {
         inMemoryHistoryManager = new InMemoryHistoryManager();
     }
 
+    /**
+     * Создает экземпляр класса с переданным экземпляром {@code inMemoryHistoryManager}
+     *
+     * @param inMemoryHistoryManager который хранит внутри себя все данные и логику
+     *                               для работы с историей выполнения привычек
+     */
     public InMemoryHabitsManager(InMemoryHistoryManager inMemoryHistoryManager) {
         this.inMemoryHistoryManager = inMemoryHistoryManager;
         habitIdGenerator = new InMemoryUserManager.IdGenerator();
         habitsByUsers = new HashMap<>();
     }
 
+    /**
+     * Добавляет новую привычку в базу
+     *
+     * @param user  к которому будет привязана новая привычка
+     * @param habit новая привычка
+     */
     @Override
     public void addNewHabit(User user, Habit habit) {
         habit.setId(habitIdGenerator.getNextFreeId());     // выдаю привычке уникальный id
@@ -38,6 +57,12 @@ public class InMemoryHabitsManager implements HabitsManager {
         inMemoryHistoryManager.createHabitHistory(habit);
     }
 
+    /**
+     * удаляет привычку юзера
+     *
+     * @param user у которого надо удалить привычку
+     * @param id   привычки которую надо удалить
+     */
     @Override
     public void deleteHabitById(User user, Integer id) {
         if (!habitsByUsers.containsKey(user)) {
@@ -71,6 +96,11 @@ public class InMemoryHabitsManager implements HabitsManager {
         habitsByUsers.get(user).get(habit.getId()).setHabitStatus(newStatus);
     }
 
+    /**
+     * Устанавливает статус всех привычек на {@code HabitStatus.FINISHED}
+     *
+     * @param user у которого надо поменять статус всех привычек
+     */
     @Override
     public void setEveryHabitStatusFinished(User user) {
         getAllUserHabits(user).forEach(habit -> habit.setHabitStatus(HabitStatus.FINISHED));
@@ -117,19 +147,19 @@ public class InMemoryHabitsManager implements HabitsManager {
         if (!habitsByUsers.containsKey(user)) {
             return null;
         }
-        /*
-        ArrayList<Habit> allHabits = getAllUserHabits(user);
-        ArrayList<Habit> targetHabits = new ArrayList<>();
-        allHabits.forEach(e -> {
-            if (e.getHabitStatus().equals(status)) {
-                targetHabits.add(e);
-            }
-        });*/
         ArrayList<Habit> allHabits = getAllUserHabits(user);
         return allHabits.stream().filter(e -> e.getHabitStatus().equals(status))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    /**
+     * Метод для сортировки всех привычек юзера по {@code HabitStatus}
+     * в естественном порядке (будет сортировка по возрастанию NEW, IN_PROGRESS, FINISHED)
+     * и вернуть отсортированный список привычек
+     *
+     * @param user у которого будет сортировка привычек
+     * @return возвращает отсортированный список привычек
+     */
     @Override
     public ArrayList<Habit> getUserHabitsFilteredByStatus(User user) {
         if (!habitsByUsers.containsKey(user)) {
@@ -140,6 +170,13 @@ public class InMemoryHabitsManager implements HabitsManager {
         return habits;
     }
 
+    /**
+     * Метод для сортировки всех {@code Habit} у {@code User} по дате создания привычки
+     * и вернуть отсортированный список привычек
+     *
+     * @param user у которого будет сортировка привычек
+     * @return возвращает отсортированный список привычек
+     */
     @Override
     public ArrayList<Habit> getAllUserHabitsFilteredByCreationDate(User user) {
         if (!habitsByUsers.containsKey(user)) {

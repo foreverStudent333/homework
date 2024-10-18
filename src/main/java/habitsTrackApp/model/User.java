@@ -1,5 +1,10 @@
 package habitsTrackApp.model;
 
+/**
+ * Класс описывающий сущность пользователь
+ *
+ * @author Mihail Harhan
+ */
 public class User {
     private Integer id;
     private String password;

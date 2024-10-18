@@ -11,6 +11,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import java.util.SortedMap;
 
+/**
+ * Класс контроллер для запуска приложения через консоль и
+ * взаимодействия с бэкендом приложения через консоль
+ *
+ * @author Mihail Harhan "mihaillKHn@yandex.ru"
+ */
+
 public class ControllerConsole {
     Scanner scanner;
     private final InMemoryUserManager userManager;
@@ -173,9 +180,10 @@ public class ControllerConsole {
                                 System.out.println("такой привычки нет");
                                 break;
                             }
-                            System.out.println("Если хотите поменять статус введите 1\n" +
-                                    "Если хотите поменять название введите 2\n" +
-                                    "Если хотите поменять описание введите 3");
+                            System.out.println("""
+                                    Если хотите поменять статус введите 1
+                                    Если хотите поменять название введите 2
+                                    Если хотите поменять описание введите 3""");
                             int option = scanner.nextInt();
                             switch (option) {
                                 case 1:
