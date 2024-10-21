@@ -72,20 +72,11 @@ public class InMemoryAdminManager implements AdminManager {
         inMemoryUserManager.deleteUser(inMemoryUserManager.getUserByEmail(email));
     }
 
-    /**
-     * Для получения всех пользователей
-     * @return мапу всех текущих пользователй по ключу email
-     */
     @Override
     public HashMap<String, User> getAllUsers() {
         return inMemoryUserManager.getUsers();
     }
 
-    /**
-     * Для получения всех привычек пользователя
-     * @param email почта по которой найдем пользователя в базе
-     * @return список всех привычек пользователя
-     */
     @Override
     public ArrayList<Habit> getAllUserHabits(String email) {
         return inMemoryHabitsManager.getAllUserHabits(inMemoryUserManager.getUserByEmail(email));

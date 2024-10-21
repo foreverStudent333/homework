@@ -43,11 +43,6 @@ public class InMemoryUserManager implements UserManager {
         this.inMemoryHistoryManager = inMemoryHistoryManager;
     }
 
-    /**
-     * Добавляет нового юзера в базу, проверяет валидность email и выдает юзеру уникальный id
-     *
-     * @param user новый, которого нужно занести в базу
-     */
     @Override
     public void addNewUser(User user) {
         String email = user.getEmail();
@@ -75,13 +70,6 @@ public class InMemoryUserManager implements UserManager {
         return users;
     }
 
-    /**
-     * Авторизовывает юзера в системе, проверяет корректность его email и пароля
-     *
-     * @param email    по которому юзер находится в базе
-     * @param password пароль который нужно проверить принадлежит ли {@code user} и корректный ли
-     * @return {@code User} из базы юзеров
-     */
     @Override
     public User authorizeUser(String email, String password) {
         User user = getUserByEmail(email);
@@ -95,11 +83,6 @@ public class InMemoryUserManager implements UserManager {
         }
     }
 
-    /**
-     * Удаляет юзера из базы и всю его историю выполнения привычек
-     *
-     * @param user которого нужно удалить
-     */
     @Override
     public void deleteUser(User user) {
         inMemoryHistoryManager.deleteAllUserHabitsFromHistory(user);
@@ -140,12 +123,6 @@ public class InMemoryUserManager implements UserManager {
         }
     }
 
-    /**
-     * Метод вызывается при смене дня. Сбрасывает статус прогресса выполнения ежедневных привычек юзера
-     * с {@code HabitStatus.IN_PROGRESS} на {@code HabitStatus.IN_PROGRESS}
-     *
-     * @param user у которого нужно обновить статус привычек
-     */
     @Override
     public void resetAllDoneDailyHabits(User user) {
         inMemoryHabitsManager.getAllUserHabits(user).forEach(e -> {
@@ -162,12 +139,6 @@ public class InMemoryUserManager implements UserManager {
         });
     }
 
-    /**
-     * Метод вызывается при смене недели. Сбрасывает статус прогресса выполнения ежедневных
-     * и еженедельных привычек юзера с {@code HabitStatus.IN_PROGRESS} на {@code HabitStatus.IN_PROGRESS}
-     *
-     * @param user у которого нужно обновить статус привычек
-     */
     @Override
     public void resetAllDoneWeeklyHabits(User user) {
         inMemoryHabitsManager.getAllUserHabits(user).forEach(e -> {

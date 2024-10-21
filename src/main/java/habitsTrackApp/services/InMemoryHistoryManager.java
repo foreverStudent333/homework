@@ -35,10 +35,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         habitsProgressHistoryMapByUserId = new HashMap<>();
     }
 
-    /**
-     * Создает историю прогресса выполнения привычки
-     * @param habit привычка которую надо занести в историю
-     */
     @Override
     public void createHabitHistory(Habit habit) {
         TreeMap<LocalDateTime, HabitStatus> habitProgressHistory = new TreeMap<>();
@@ -46,10 +42,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         habitsProgressHistoryMap.put(habit, habitProgressHistory);
     }
 
-    /**
-     * Обновляет историю прогресса выполнения привычки со статусом {@code HabitType.DAILY}
-     * @param habit привычка у которой нужно обновить историю прогресса выполнения
-     */
     @Override
     public void updateDailyHabitHistory(Habit habit) {
         habitProgressHistory = habitsProgressHistoryMap.get(habit);
@@ -62,10 +54,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    /**
-     * Обновляет историю прогресса выполнения привычки со статусом {@code HabitType.WEEKLY}
-     * @param habit привычка у которой нужно обновить историю прогресса выполнения
-     */
     @Override
     public void updateWeeklyHabitHistory(Habit habit) {
         habitProgressHistory = habitsProgressHistoryMap.get(habit);
@@ -78,19 +66,11 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    /**
-     * Удаляет историю прогресса выполнения привычки
-     * @param habit историю которой надо удалить
-     */
     @Override
     public void deleteHabitFromHistory(Habit habit) {
         habitsProgressHistoryMap.remove(habit);
     }
 
-    /**
-     * Удаляет историю прогресса выполнения всех привычек пользователя
-     * @param user историю привычек которого надо удалить
-     */
     @Override
     public void deleteAllUserHabitsFromHistory(User user) {
         habitsProgressHistoryMap.entrySet().removeIf(
@@ -98,13 +78,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         );
     }
 
-    /**
-     * Фильтрует историю выполнения привычки за последние {@code days}
-     *
-     * @param habit историю которой фильтрует метод
-     * @param days за прошедшее кол-во дней будет выдана история
-     * @return возвращает отфильтрованную мапу истории выполнения {@code habit} за последние {@code days}
-     */
     @Override
     public SortedMap<LocalDateTime, HabitStatus> getHabitStatisticsForGivenPeriod(Habit habit, Integer days) {
         habitProgressHistory = habitsProgressHistoryMap.get(habit);
@@ -115,6 +88,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     /**
      * Метод находит процент завершенных привычек среди всех привычек за последние {@code days}
      * и возвращает этот процент.
+     *
      * @param user у которого нужно найти процент завершенных привычек
      * @param days за какое кол-во прошедших дней нужно выдавать статистику
      * @return {@code Integer} число - процент завершенных привычек среди

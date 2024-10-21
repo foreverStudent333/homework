@@ -39,12 +39,6 @@ public class InMemoryHabitsManager implements HabitsManager {
         habitsByUsers = new HashMap<>();
     }
 
-    /**
-     * Добавляет новую привычку в базу
-     *
-     * @param user  к которому будет привязана новая привычка
-     * @param habit новая привычка
-     */
     @Override
     public void addNewHabit(User user, Habit habit) {
         habit.setId(habitIdGenerator.getNextFreeId());     // выдаю привычке уникальный id
@@ -57,12 +51,6 @@ public class InMemoryHabitsManager implements HabitsManager {
         inMemoryHistoryManager.createHabitHistory(habit);
     }
 
-    /**
-     * удаляет привычку юзера
-     *
-     * @param user у которого надо удалить привычку
-     * @param id   привычки которую надо удалить
-     */
     @Override
     public void deleteHabitById(User user, Integer id) {
         if (!habitsByUsers.containsKey(user)) {
@@ -96,11 +84,6 @@ public class InMemoryHabitsManager implements HabitsManager {
         habitsByUsers.get(user).get(habit.getId()).setHabitStatus(newStatus);
     }
 
-    /**
-     * Устанавливает статус всех привычек на {@code HabitStatus.FINISHED}
-     *
-     * @param user у которого надо поменять статус всех привычек
-     */
     @Override
     public void setEveryHabitStatusFinished(User user) {
         getAllUserHabits(user).forEach(habit -> habit.setHabitStatus(HabitStatus.FINISHED));
@@ -118,14 +101,6 @@ public class InMemoryHabitsManager implements HabitsManager {
         return habitsByUsers.get(user).get(habitId);
     }
 
-    /**
-     * Returns {@code null} если нет такого юзера в базе.
-     * Если юзер есть вытаскиваю из мапы все привычки юзера
-     * и делаю из них ArrayList
-     *
-     * @param user это пользователь по которому выдадим все его привычки
-     * @return возвращаем список всех привычек юзера
-     */
     @Override
     public ArrayList<Habit> getAllUserHabits(User user) {
         if (!habitsByUsers.containsKey(user)) {
@@ -134,14 +109,6 @@ public class InMemoryHabitsManager implements HabitsManager {
         return new ArrayList<>(habitsByUsers.get(user).values());
     }
 
-    /**
-     * Returns {@code null} если нет такого юзера в базе.
-     *
-     * @param user это пользователь привычки которого фильтруем.
-     *             {@code status} это статус по которому фильтруем
-     * @return возвращаем список только тех привычек которые
-     * имеют статус переданный в параметре {@code status}
-     */
     @Override
     public ArrayList<Habit> getUserHabitsWithACertainStatus(User user, HabitStatus status) {
         if (!habitsByUsers.containsKey(user)) {
@@ -152,14 +119,6 @@ public class InMemoryHabitsManager implements HabitsManager {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    /**
-     * Метод для сортировки всех привычек юзера по {@code HabitStatus}
-     * в естественном порядке (будет сортировка по возрастанию NEW, IN_PROGRESS, FINISHED)
-     * и вернуть отсортированный список привычек
-     *
-     * @param user у которого будет сортировка привычек
-     * @return возвращает отсортированный список привычек
-     */
     @Override
     public ArrayList<Habit> getUserHabitsFilteredByStatus(User user) {
         if (!habitsByUsers.containsKey(user)) {
@@ -170,13 +129,6 @@ public class InMemoryHabitsManager implements HabitsManager {
         return habits;
     }
 
-    /**
-     * Метод для сортировки всех {@code Habit} у {@code User} по дате создания привычки
-     * и вернуть отсортированный список привычек
-     *
-     * @param user у которого будет сортировка привычек
-     * @return возвращает отсортированный список привычек
-     */
     @Override
     public ArrayList<Habit> getAllUserHabitsFilteredByCreationDate(User user) {
         if (!habitsByUsers.containsKey(user)) {
